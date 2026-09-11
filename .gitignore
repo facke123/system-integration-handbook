@@ -1,0 +1,8 @@
+*.pdf
+*.7z
+*.zip
+node_modules/
+.system_generated/
+scratch/
+epfhk_photo_library/
+02.*/
