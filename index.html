@@ -6,8 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="基于全国计算机技术与软件专业技术资格考试最新版教材《系统集成项目管理工程师教程（第3版）》精编提炼的通关速记手册">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <!-- Docsify Theme -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"/>
+  <!-- KaTeX CSS -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"/>
   <style>
     :root {
       --theme-color: #2980b9;
@@ -24,6 +26,17 @@
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       margin: 16px 0;
+      max-width: 100%;
+    }
+    /* KaTeX formula optimization */
+    .katex-display {
+      margin: 1.2em 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 6px 0;
+    }
+    .katex {
+      font-size: 1.05em;
     }
   </style>
 </head>
@@ -46,12 +59,34 @@
         buttonText: '复制公式/考点',
         errorText: '错误',
         successText: '已复制'
-      }
+      },
+      plugins: [
+        function(hook, vm) {
+          hook.doneEach(function() {
+            // Render all KaTeX math formulas after markdown rendered
+            if (typeof renderMathInElement === 'function') {
+              renderMathInElement(document.body, {
+                delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false},
+                  {left: '\\(', right: '\\)', display: false},
+                  {left: '\\[', right: '\\]', display: true}
+                ],
+                ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                throwOnError: false
+              });
+            }
+          });
+        }
+      ]
     }
   </script>
+  <!-- Docsify Core and Plugins -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
+  <!-- KaTeX core and auto-render plugin -->
+  <script src="//cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 </body>
 </html>
