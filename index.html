@@ -14,6 +14,9 @@
     :root {
       --theme-color: #2980b9;
     }
+    html {
+      scroll-behavior: smooth;
+    }
     .markdown-section {
       max-width: 960px;
       padding: 30px 15px 40px;
@@ -28,6 +31,12 @@
       margin: 16px 0;
       max-width: 100%;
     }
+    /* Smooth anchor margin offset */
+    .markdown-section h2, 
+    .markdown-section h3, 
+    .markdown-section h4 {
+      scroll-margin-top: 30px;
+    }
     /* KaTeX formula optimization */
     .katex-display {
       margin: 1.2em 0;
@@ -38,6 +47,14 @@
     .katex {
       font-size: 1.05em;
     }
+    /* Sidebar navigation styling */
+    .sidebar {
+      padding-top: 15px;
+    }
+    .sidebar-nav strong {
+      color: #2c3e50;
+      font-size: 0.95em;
+    }
   </style>
 </head>
 <body>
@@ -47,8 +64,8 @@
       name: '软考中级：系统集成速记手册',
       repo: 'https://github.com/facke123/system-integration-handbook',
       homepage: 'README.md',
-      loadSidebar: false,
-      subMaxLevel: 3,
+      loadSidebar: true,
+      subMaxLevel: 2,
       auto2top: true,
       search: {
         placeholder: '搜索核心知识点、公式与考点...',
@@ -63,7 +80,7 @@
       plugins: [
         function(hook, vm) {
           hook.doneEach(function() {
-            // Render all KaTeX math formulas after markdown rendered
+            // 1. Render all KaTeX math formulas after markdown rendered
             if (typeof renderMathInElement === 'function') {
               renderMathInElement(document.body, {
                 delimiters: [
@@ -76,6 +93,48 @@
                 throwOnError: false
               });
             }
+
+            // 2. Reliable smooth anchor scrolling for in-page TOC and sidebar links
+            function scrollToTarget(targetId) {
+              if (!targetId || targetId === '/' || targetId === 'README') return;
+              var el = document.getElementById(targetId) ||
+                       document.querySelector('[data-id="' + targetId + '"]') ||
+                       document.querySelector('[id="' + targetId + '"]');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+
+            // Scroll on initial page load if hash has ?id=...
+            var hash = window.location.hash || '';
+            var initMatch = hash.match(/[?&]id=([^&]+)/);
+            if (initMatch && initMatch[1]) {
+              setTimeout(function() {
+                scrollToTarget(decodeURIComponent(initMatch[1]));
+              }, 250);
+            }
+
+            // Intercept clicks on links that contain an anchor
+            document.querySelectorAll('a[href*="#"]').forEach(function(anchor) {
+              anchor.addEventListener('click', function(e) {
+                var href = anchor.getAttribute('href');
+                if (!href) return;
+                var m = href.match(/[?&]id=([^&]+)/) || href.match(/#\/?([^?&]+)/);
+                if (m && m[1]) {
+                  var targetId = decodeURIComponent(m[1]);
+                  if (targetId && targetId !== '/' && targetId !== 'README') {
+                    var el = document.getElementById(targetId) ||
+                             document.querySelector('[data-id="' + targetId + '"]') ||
+                             document.querySelector('[id="' + targetId + '"]');
+                    if (el) {
+                      e.preventDefault();
+                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      history.pushState(null, null, '#/?id=' + encodeURIComponent(targetId));
+                    }
+                  }
+                }
+              });
+            });
           });
         }
       ]
